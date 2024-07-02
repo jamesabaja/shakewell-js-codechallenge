@@ -145,6 +145,11 @@ const SettingsSelector = (): JSX.Element => {
     /* Button */
     return (
       <button onClick={handleOpen} className="button">
+        <img
+          src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${currentData.country.code}.svg`}
+          alt={`${currentData.country.name} flag`}
+          height={12}
+        />{" "}
         {currentData.country.name} - ({currentData.currency} -{" "}
         {currentData.language})
       </button>
