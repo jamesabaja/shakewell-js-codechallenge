@@ -1,7 +1,7 @@
 import { OptionProps, components } from "react-select";
 
 /* --- [TASK] ---
-Country flags in select field
+✅ Country flags in select field
 
 CURRENT SCENARIO
 - The `CountrySelect` displays only the names of the countries.
@@ -21,9 +21,26 @@ FURTHER DETAILS
 
 // Component
 export const CountrySelectOption = (props: OptionProps<any>) => {
+  const countryCode = props.data.value.code;
+  const countryName = props.data.value.name;
   return (
     <div>
-      <components.Option {...props} />
+      <components.Option {...props}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+          }}
+        >
+          <img
+            src={`https://catamphetamine.gitlab.io/country-flag-icons/3x2/${countryCode}.svg`}
+            alt={`${countryName} flag`}
+            height={12}
+          />
+          {countryName}
+        </div>
+      </components.Option>
     </div>
   );
 };

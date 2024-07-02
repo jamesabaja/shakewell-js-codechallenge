@@ -1,11 +1,13 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import Modal from "react-modal";
-import CountrySelect, { DEFAULT_COUNTRY } from "../country/CountrySelect";
-import LanguageSelect, { DEFAULT_LANGUAGE } from "../language/LanguageSelect";
-import CurrencySelect, { DEFAULT_CURRENCY } from "../currency/CurrencySelect";
+import CountrySelect from "../country/CountrySelect";
+import LanguageSelect from "../language/LanguageSelect";
+import CurrencySelect from "../currency/CurrencySelect";
+import { CountryData, SettingsData } from "../interfaces";
+import { DEFAULT_STATE } from "../constants";
 
 /* --- [TASK] ---
-Changes on modal are only applied on SAVE
+✅ Changes on modal are only applied on SAVE
 
 CURRENT SCENARIO
 - Clicking the `SettingsSelector`-Button opens a modal dialog.
@@ -22,7 +24,7 @@ FURTHER DETAILS
 --- [TASK] --- */
 
 /* --- [TASK] ---
-Reduced number of unnecessary re-renders
+✅ Reduced number of unnecessary re-renders
 
 CURRENT SCENARIO
 - The `SettingsSelector`-Button re-renders too often
@@ -37,7 +39,7 @@ FURTHER DETAILS
 --- [TASK] --- */
 
 /* --- [TASK] ---
-Improved layout and styling of modal dialog (CSS)
+✅ Improved layout and styling of modal dialog (CSS)
 
 CURRENT SCENARIO
 - The modal dialog lacks intentional layout (spacings, dimensions).
@@ -54,7 +56,7 @@ FURTHER DETAILS
 --- [TASK] --- */
 
 /* --- [TASK] ---
-Improved use of TypeScript
+✅ Improved use of TypeScript
 
 CURRENT SCENARIO
 - In `SettingsSelector`, there are individual `useState()` calls for `Country`, `Language`, and `Currency`.
@@ -79,7 +81,7 @@ OPTIONAL BONUS
 --- [TASK] --- */
 
 /* --- [TASK] ---
- ReactDOM.render is no longer supported
+✅ ReactDOM.render is no longer supported
 
 CURRENT SCENARIO
 - There is an error logging in the console
@@ -96,23 +98,44 @@ FURTHER DETAILS
 // Component
 const SettingsSelector = (): JSX.Element => {
   // States
-  const [modalIsOpen, setModalIsOpen] = React.useState<any>(false);
-  const [selectedCountry, setCountry] = React.useState<any>(DEFAULT_COUNTRY);
-  const [selectedCurrency, setCurrency] = React.useState<any>(DEFAULT_CURRENCY);
-  const [selectedLanguage, setLanguage] = React.useState<any>(DEFAULT_LANGUAGE);
+  const [modalIsOpen, setModalIsOpen] = React.useState<boolean>(false);
+  const [selectedData, setSelectedData] =
+    React.useState<SettingsData>(DEFAULT_STATE);
+  const [currentData, setCurrentData] =
+    React.useState<SettingsData>(DEFAULT_STATE);
+  const {
+    country: selectedCountry,
+    language: selectedLanguage,
+    currency: selectedCurrency,
+  } = selectedData;
+
+  const setCountry = (country: CountryData) => {
+    setSelectedData((previousData) => ({ ...previousData, country }));
+  };
+  const setCurrency = (currency: string) => {
+    setSelectedData((previousData) => ({ ...previousData, currency }));
+  };
+  const setLanguage = (language: string) => {
+    setSelectedData((previousData) => ({ ...previousData, language }));
+  };
 
   // Render Counter
   const counter = useRef(0);
 
   // Actions
   const handleOpen = () => {
+    setSelectedData(currentData);
     setModalIsOpen(true);
   };
   const handleClose = () => {
     setModalIsOpen(false);
   };
+  const handleSave = () => {
+    setCurrentData(selectedData);
+    handleClose();
+  };
 
-  const button = () => {
+  const button = useMemo(() => {
     // Increase render count.
     counter.current++;
 
@@ -121,33 +144,51 @@ const SettingsSelector = (): JSX.Element => {
 
     /* Button */
     return (
-      <button onClick={handleOpen}>
-        {selectedCountry.name} - ({selectedCurrency} - {selectedLanguage})
+      <button onClick={handleOpen} className="button">
+        {currentData.country.name} - ({currentData.currency} -{" "}
+        {currentData.language})
       </button>
     );
-  };
+  }, [currentData]);
 
   // Render
   return (
     <div>
-      {button()}
+      {button}
 
       {/* Modal */}
       <Modal isOpen={modalIsOpen}>
-        {/* Header */}
-        <h2>Select your region, currency and language.</h2>
+        <div className="modal">
+          <div className="content">
+            <div>
+              {/* Header */}
+              <h2>Select your region, currency and language.</h2>
+              <hr className="hr" />
+            </div>
 
-        {/* Country */}
-        <CountrySelect value={selectedCountry} onChange={setCountry} />
+            {/* Country */}
+            <CountrySelect value={selectedCountry} onChange={setCountry} />
 
-        {/* Currency */}
-        <CurrencySelect value={selectedCurrency} onChange={setCurrency} />
+            {/* Currency */}
+            <CurrencySelect value={selectedCurrency} onChange={setCurrency} />
 
-        {/* Language */}
-        <LanguageSelect language={selectedLanguage} onChange={setLanguage} />
+            {/* Language */}
+            <LanguageSelect
+              language={selectedLanguage}
+              onChange={setLanguage}
+            />
+          </div>
 
-        {/* Close button */}
-        <button onClick={handleClose}>Close</button>
+          <div className="footer">
+            {/* Close button */}
+            <button className="button" onClick={handleClose}>
+              Close
+            </button>
+            <button className="button" onClick={handleSave}>
+              Save
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
